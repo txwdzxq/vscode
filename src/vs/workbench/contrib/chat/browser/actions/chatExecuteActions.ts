@@ -133,13 +133,21 @@ export class ChatEditingSessionSubmitAction extends SubmitAction {
 	static readonly ID = 'workbench.action.edits.submit';
 
 	constructor() {
+		const precondition = ContextKeyExpr.and(
+			// if the input has prompt instructions attached, allow submitting requests even
+			// without text present - having instructions is enough context for a request
+			ContextKeyExpr.or(ChatContextKeys.inputHasText, ChatContextKeys.instructionsAttached),
+			ChatContextKeys.location.isEqualTo(ChatAgentLocation.EditingSession),
+			applyingChatEditsContextKey.toNegated(),
+		);
+
 		super({
 			id: ChatEditingSessionSubmitAction.ID,
 			title: localize2('edits.submit.label', "Send"),
 			f1: false,
 			category: CHAT_CATEGORY,
 			icon: Codicon.send,
-			precondition: ContextKeyExpr.and(ChatContextKeys.inputHasText, ChatContextKeys.location.isEqualTo(ChatAgentLocation.EditingSession), applyingChatEditsContextKey.toNegated()),
+			precondition,
 			keybinding: {
 				when: ChatContextKeys.inChatInput,
 				primary: KeyCode.Enter,
