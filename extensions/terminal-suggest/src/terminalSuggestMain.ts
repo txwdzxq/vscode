@@ -260,6 +260,9 @@ export async function collectCompletionItemResult(command: Command, parsedArgume
 							continue;
 						}
 						const generatedItems = generator.postProcess(output, command.tokens.map(e => e.text));
+						if (!generatedItems) {
+							continue;
+						}
 						for (const generatedItem of generatedItems) {
 							if (!generatedItem) {
 								continue;
@@ -360,6 +363,7 @@ export async function getCompletionItemsFromSpecs(
 		}
 	}
 
+	let hasCurrentArg = false;
 	for (const spec of specs) {
 		const specLabels = getLabel(spec);
 
@@ -404,7 +408,7 @@ export async function getCompletionItemsFromSpecs(
 				{ environmentVariables: env, currentWorkingDirectory: shellIntegrationCwd.fsPath, sshPrefix: '', currentProcess: name, /* TODO: pass in aliases */ },
 				spec,
 			);
-
+			hasCurrentArg ||= !!parsedArguments.currentArg;
 			const completionItemResult = await collectCompletionItemResult(command, parsedArguments, prefix, terminalContext, items);
 			if (completionItemResult) {
 				filesRequested ||= completionItemResult.filesRequested;
@@ -423,7 +427,7 @@ export async function getCompletionItemsFromSpecs(
 		}
 		filesRequested = true;
 		foldersRequested = true;
-	} else if (!items.length && !filesRequested && !foldersRequested) {
+	} else if (!items.length && !filesRequested && !foldersRequested && !hasCurrentArg) {
 		// Not a command and no specific args or options were provided, so show resources
 		filesRequested = true;
 		foldersRequested = true;
