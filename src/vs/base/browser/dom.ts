@@ -1891,7 +1891,8 @@ export interface IModifierKeyStatus {
 export class ModifierKeyEmitter extends event.Emitter<IModifierKeyStatus> {
 
 	// This emitter is a lazily created singleton (see `getInstance`) that is allowed
-	// to outlive the test that happens to create it first
+	// to outlive the test that happens to create it first. `Emitter` itself is not
+	// tracked, so the store has to be marked to keep it out of leak detection.
 	private readonly _subscriptions = markAsSingleton(new DisposableStore());
 	private _keyStatus: IModifierKeyStatus;
 	private static instance: ModifierKeyEmitter | undefined;
