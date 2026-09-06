@@ -59,8 +59,6 @@ import { IHostService } from '../../../services/host/browser/host.js';
 import { BugIndicatingError } from '../../../../base/common/errors.js';
 import { applyDragImage } from '../../../../base/browser/ui/dnd/dnd.js';
 
-const modifierKeyEmitter = ModifierKeyEmitter.getInstance();
-
 interface IEditorInputLabel {
 	readonly editor: EditorInput;
 
@@ -179,7 +177,7 @@ export class MultiEditorTabsControl extends EditorTabsControl {
 
 		// React to Alt being held/released to swap in the "Close Others" tab action
 		// for the currently hovered tab only (if any).
-		this._register(modifierKeyEmitter.event(e => this.setAltPressed(e.altKey)));
+		this._register(ModifierKeyEmitter.getInstance().event(e => this.setAltPressed(e.altKey)));
 
 		// Alt can get stuck when focus leaves the window while it is held (e.g. Alt+Tab
 		// to another application) because the matching `keyup` is never received. Give

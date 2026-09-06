@@ -7,7 +7,7 @@ import assert from 'assert';
 import { $, EventType, ModifierKeyEmitter } from '../../../../../base/browser/dom.js';
 import { mainWindow } from '../../../../../base/browser/window.js';
 import { Event } from '../../../../../base/common/event.js';
-import { DisposableStore } from '../../../../../base/common/lifecycle.js';
+import { DisposableStore, toDisposable } from '../../../../../base/common/lifecycle.js';
 import { URI } from '../../../../../base/common/uri.js';
 import { mock } from '../../../../../base/test/common/mock.js';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../../base/test/common/utils.js';
@@ -31,6 +31,11 @@ suite('MultiEditorTabsControl', () => {
 
 	setup(() => {
 		disposables = new DisposableStore();
+
+		// The tabs control resolves the shared modifier key emitter on creation,
+		// so dispose it again to keep each test independent of the Alt state that
+		// other suites may have left behind
+		disposables.add(toDisposable(() => ModifierKeyEmitter.disposeInstance()));
 
 		const instantiationService = workbenchInstantiationService(undefined, disposables);
 		instantiationService.stub(ITreeViewsDnDService, new TreeViewsDnDService());
@@ -88,8 +93,6 @@ suite('MultiEditorTabsControl', () => {
 	teardown(() => {
 		container.remove();
 		disposables.dispose();
-
-		ModifierKeyEmitter.getInstance().resetKeyStatus();
 	});
 
 	function tabActions(): string[] {
